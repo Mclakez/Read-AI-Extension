@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "ReadAI",
+  "version": "1.0",
+  "description": "Highlight text to get AI explanations with context",
+
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "offscreen"
+  ],
+
+  "host_permissions": [
+    "https://api.groq.com/*",
+    "https://api.dictionaryapi.dev/*"
+  ],
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icons/icon.png"
+  },
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+
+  "commands": {
+    "explain-selection": {
+      "suggested_key": {
+        "default": "Alt+Shift+E"
+      },
+      "description": "Explain highlighted text"
+    }
+  },
+
+  "icons": {
+    "48": "icons/icon.png"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["dictionary.json"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
