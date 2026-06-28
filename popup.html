@@ -69,12 +69,28 @@
         min-height: 16px;
         color: #7c6af7;
       }
+
+      a#groq-link {
+        color: #7c6af7;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 4px;
+      }
+      
+      a#groq-link:hover {
+        text-decoration: underline;
+      }
     </style>
   </head>
   <body>
     <h2>ReadAI Settings</h2>
-    <p>Paste your Groq API key below. It's saved locally on your device only.</p>
-
+    <p>
+      Paste your Groq API key below. It's saved locally on your device only.
+      Don't have a key? 
+      <a href="https://console.groq.com" target="_blank" id="groq-link">
+        Get one free at Groq →
+      </a>
+    </p>
     <input type="password" id="api-key-input" placeholder="gsk_..." />
     <button id="save-btn">Save Key</button>
     <div id="status"></div>

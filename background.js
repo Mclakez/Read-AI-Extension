@@ -25,7 +25,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 async function handleExplanationRequest(payload) {
-  const isOnline = navigator.onLine;
+  let isOnline = true;
+  try {
+    const test = await fetch("https://api.groq.com", { method: "HEAD" });
+    isOnline = true;
+  } catch {
+    isOnline = false;
+  }
   const wordCount = payload.selectedText?.trim().split(/\s+/).length ?? 0;
 
   // Single word — use dictionary
@@ -223,7 +229,7 @@ function isDictionaryLoaded(db) {
 
 // Load dictionary.json and store every word in IndexedDB
 async function loadDictionaryIntoDatabase(db) {
-  const url = chrome.runtime.getURL("dictionary.json");
+  const url = "https://raw.githubusercontent.com/Mclakez/readai-assets/refs/heads/main/dictionary.json";
   const response = await fetch(url);
   const data = await response.json();
 

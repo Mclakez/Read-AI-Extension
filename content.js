@@ -43,14 +43,31 @@ function createPopup(rect) {
   popup.style.left = `${Math.min(window.scrollX + rect.left, window.innerWidth - 340)}px`;
   popup.style.top = "0px"; // temporary
 
-  popup.innerHTML = `
-    <button id="readai-close">✕</button>
-    <div id="readai-thread"></div>
-    <div id="readai-followup">
-      <input id="readai-input" type="text" placeholder="Ask a follow-up..." />
-      <button id="readai-send">→</button>
-    </div>
-  `;
+  const closeBtn = document.createElement("button");
+  closeBtn.id = "readai-close";
+  closeBtn.textContent = "✕";
+  
+  const thread = document.createElement("div");
+  thread.id = "readai-thread";
+  
+  const followup = document.createElement("div");
+  followup.id = "readai-followup";
+  
+  const input = document.createElement("input");
+  input.id = "readai-input";
+  input.type = "text";
+  input.placeholder = "Ask a follow-up...";
+  
+  const sendBtn = document.createElement("button");
+  sendBtn.id = "readai-send";
+  sendBtn.textContent = "→";
+  
+  followup.appendChild(input);
+  followup.appendChild(sendBtn);
+  
+  popup.appendChild(closeBtn);
+  popup.appendChild(thread);
+  popup.appendChild(followup);
 
   document.body.appendChild(popup);
 
@@ -168,20 +185,54 @@ function createDictionaryPopup(rect, data) {
   popup.style.left = `${Math.min(window.scrollX + rect.left, window.innerWidth - 340)}px`;
   popup.style.top = "0px";
 
-  const meaningsHTML = data.meanings.map(m => `
-    <div class="readai-dict-meaning">
-      ${m.partOfSpeech ? `<span class="readai-dict-pos">${m.partOfSpeech}</span>` : ""}
-      <p class="readai-dict-def">${m.definition}</p>
-      ${m.example ? `<p class="readai-dict-example">"${m.example}"</p>` : ""}
-    </div>
-  `).join("");
-
-  popup.innerHTML = `
-    <button id="readai-close">✕</button>
-    <div class="readai-dict-word">${data.word}</div>
-    ${data.phonetic ? `<div class="readai-dict-phonetic">${data.phonetic}</div>` : ""}
-    <div class="readai-dict-meanings">${meaningsHTML}</div>
-  `;
+  const closeBtn = document.createElement("button");
+  closeBtn.id = "readai-close";
+  closeBtn.textContent = "✕";
+  
+  const wordEl = document.createElement("div");
+  wordEl.className = "readai-dict-word";
+  wordEl.textContent = data.word;
+  
+  const meaningsEl = document.createElement("div");
+  meaningsEl.className = "readai-dict-meanings";
+  
+  data.meanings.forEach(m => {
+    const meaning = document.createElement("div");
+    meaning.className = "readai-dict-meaning";
+  
+    if (m.partOfSpeech) {
+      const pos = document.createElement("span");
+      pos.className = "readai-dict-pos";
+      pos.textContent = m.partOfSpeech;
+      meaning.appendChild(pos);
+    }
+  
+    const def = document.createElement("p");
+    def.className = "readai-dict-def";
+    def.textContent = m.definition;
+    meaning.appendChild(def);
+  
+    if (m.example) {
+      const ex = document.createElement("p");
+      ex.className = "readai-dict-example";
+      ex.textContent = `"${m.example}"`;
+      meaning.appendChild(ex);
+    }
+  
+    meaningsEl.appendChild(meaning);
+  });
+  
+  popup.appendChild(closeBtn);
+  popup.appendChild(wordEl);
+  
+  if (data.phonetic) {
+    const phonetic = document.createElement("div");
+    phonetic.className = "readai-dict-phonetic";
+    phonetic.textContent = data.phonetic;
+    popup.appendChild(phonetic);
+  }
+  
+  popup.appendChild(meaningsEl);
 
   document.body.appendChild(popup);
   positionPopup(popup, rect);
