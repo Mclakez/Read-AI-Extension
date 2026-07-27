@@ -1,3 +1,14 @@
+function formatExplanationForNotification(explanation) {
+  if (!explanation) return null;
+  if (explanation.explanation) return explanation.explanation;
+  if (explanation.type === "dictionary" && explanation.meanings?.length) {
+    return explanation.word + ": " + explanation.meanings
+      .map(m => (m.partOfSpeech ? m.partOfSpeech + ": " : "") + m.definition)
+      .join(" | ");
+  }
+  return null;
+}
+
 // Ensure context menu exists (in case onInstalled didn't fire)
 function ensureContextMenuExists() {
   try {
@@ -46,7 +57,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   // Fallback: handle directly in background if content script not available
   if (info.selectionText && info.selectionText.trim()) {
     var explanation = await explainClipboardText(info.selectionText);
-    if (explanation && explanation.explanation) {
+    var notifText = formatExplanationForNotification(explanation);
+    if (notifText) {
       try {
         await chrome.scripting.executeScript({
           target: { tabId: resolvedTab.id },
@@ -57,7 +69,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             document.body.appendChild(d);
             setTimeout(() => d.remove(), 15000);
           },
-          args: [explanation.explanation]
+          args: [notifText]
         });
         return;
       } catch (e) {}
@@ -71,7 +83,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     var text = results?.[0]?.result || "";
     if (text) {
       var result = await explainClipboardText(text);
-      if (result && result.explanation) {
+      var notifText = formatExplanationForNotification(result);
+      if (notifText) {
         await chrome.scripting.executeScript({
           target: { tabId: resolvedTab.id },
           func: (msg) => {
@@ -81,7 +94,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
             document.body.appendChild(d);
             setTimeout(() => d.remove(), 15000);
           },
-          args: [result.explanation]
+          args: [notifText]
         });
         return;
       }

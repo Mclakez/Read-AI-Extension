@@ -224,45 +224,45 @@ async function handleExplain(fallbackSelectionText) {
       return true;
     }
 
-    if (!shouldUseBoxSelect()) {
+    if (!shouldUseBoxSelect()) return false;
 
-  // Right-clicked on an <img> — use its bounds directly, no overlay needed
-  if (lastMouseTarget && lastMouseTarget.tagName === "IMG") {
+    // Right-clicked on an <img> — use its bounds directly, no overlay needed
+    if (lastMouseTarget && lastMouseTarget.tagName === "IMG") {
 
-    var img = lastMouseTarget;
-    var imgBounds = img.getBoundingClientRect();
-    var rect = {
-      x: imgBounds.left, y: imgBounds.top,
-      width: imgBounds.width, height: imgBounds.height,
-      devicePixelRatio: window.devicePixelRatio || 1,
-      left: imgBounds.left, top: imgBounds.top,
-      bottom: imgBounds.top + imgBounds.height,
-      right: imgBounds.left + imgBounds.width
-    };
-    await handleImageMode(rect, img);
+      var img = lastMouseTarget;
+      var imgBounds = img.getBoundingClientRect();
+      var rect = {
+        x: imgBounds.left, y: imgBounds.top,
+        width: imgBounds.width, height: imgBounds.height,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        left: imgBounds.left, top: imgBounds.top,
+        bottom: imgBounds.top + imgBounds.height,
+        right: imgBounds.left + imgBounds.width
+      };
+      await handleImageMode(rect, img);
+      return true;
+    }
+
+    if (lastMouseTarget && lastMouseTarget.tagName === "CANVAS") {
+
+      var cvsBounds = lastMouseTarget.getBoundingClientRect();
+      var rect = {
+        x: cvsBounds.left, y: cvsBounds.top,
+        width: cvsBounds.width, height: cvsBounds.height,
+        devicePixelRatio: window.devicePixelRatio || 1,
+        left: cvsBounds.left, top: cvsBounds.top,
+        bottom: cvsBounds.top + cvsBounds.height,
+        right: cvsBounds.left + cvsBounds.width
+      };
+      await handleImageMode(rect, lastMouseTarget);
+      return true;
+    }
+
+    const boxRect = await startBoxSelection();
+    if (!boxRect) return false;
+
+    await handleImageMode(boxRect);
     return true;
-  }
-
-  if (lastMouseTarget && lastMouseTarget.tagName === "CANVAS") {
-
-    var cvsBounds = lastMouseTarget.getBoundingClientRect();
-    var rect = {
-      x: cvsBounds.left, y: cvsBounds.top,
-      width: cvsBounds.width, height: cvsBounds.height,
-      devicePixelRatio: window.devicePixelRatio || 1,
-      left: cvsBounds.left, top: cvsBounds.top,
-      bottom: cvsBounds.top + cvsBounds.height,
-      right: cvsBounds.left + cvsBounds.width
-    };
-    await handleImageMode(rect, lastMouseTarget);
-    return true;
-  }
-
-  const boxRect = await startBoxSelection();
-  if (!boxRect) return false;
-
-  await handleImageMode(boxRect);
-  return true;
   } catch (err) {
     showErrorPopup({ left: lastMouseX || 0, top: lastMouseY || 0 }, `Error: ${err.message}`);
     return false;
@@ -275,6 +275,7 @@ async function handleImageMode(rect, imgElement) {
 
   var payload;
   if (imgElement && imgElement.tagName === "IMG") {
+    var src = imgElement.currentSrc || imgElement.src || "";
     if (src && src.startsWith("http")) {
       payload = { imageUrl: src, history: [] };
     } else {
